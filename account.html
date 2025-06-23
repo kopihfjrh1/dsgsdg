@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #f6f8fa;
+        color: #222;
+      }
+      .sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        width: 210px;
+        background: #fff;
+        border-right: 1px solid #e0e0e0;
+        padding: 32px 0 0 0;
+        z-index: 100;
+        transition: left 0.2s;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .sidebar h2 {
+        font-size: 1.2em;
+        margin: 0 0 24px 32px;
+        color: #1976d2;
+      }
+      .sidebar a {
+        display: block;
+        padding: 12px 32px;
+        color: #222;
+        text-decoration: none;
+        font-size: 1em;
+        border-left: 4px solid transparent;
+        transition: background 0.15s, border 0.15s;
+      }
+      .sidebar a:hover, .sidebar a.active {
+        background: #f0f4fa;
+        border-left: 4px solid #1976d2;
+        color: #1976d2;
+      }
+      @media (max-width: 700px) {
+        .sidebar {
+          left: -220px;
+          width: 180px;
+        }
+        .sidebar.active {
+          left: 0;
+        }
+      }
+      header {
+        position: fixed;
+        left: 210px;
+        right: 0;
+        top: 0;
+        height: 56px;
+        background: #fff;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        padding: 0 32px;
+        z-index: 101;
+        font-size: 1.1em;
+        font-weight: 500;
+        justify-content: space-between;
+      }
+      .menu-toggle {
+        display: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        margin-right: 16px;
+      }
+      @media (max-width: 700px) {
+        header {
+          left: 0;
+          padding: 0 16px;
+        }
+        .menu-toggle {
+          display: inline-block;
+        }
+      }
+      .profile {
+        margin: 80px auto 0 auto;
+        max-width: 480px;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+        padding: 32px 24px 32px 24px;
+        position: relative;
+      }
+      .profile img#avatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #1976d2;
+        margin-bottom: 12px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .profile h2 {
+        text-align: center;
+        margin: 0 0 8px 0;
+        font-size: 1.5em;
+      }
+      .profile p {
+        text-align: center;
+        margin: 0 0 8px 0;
+        color: #555;
+      }
+      .form-section {
+        display: none;
+        margin: 18px 0 0 0;
+        background: #f7faff;
+        border-radius: 10px;
+        padding: 18px 16px;
+        box-shadow: 0 1px 4px rgba(25,118,210,0.07);
+      }
+      .form-section label {
+        display: block;
+        margin: 10px 0 4px 0;
+        font-size: 0.98em;
+        color: #1976d2;
+      }
+      .form-section input[type="file"],
+      .form-section input[type="text"],
+      .form-section textarea {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        border: 1px solid #cfd8dc;
+        border-radius: 6px;
+        font-size: 1em;
+        background: #fff;
+        box-sizing: border-box;
+      }
+      .form-section button {
+        background: #1976d2;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 22px;
+        font-size: 1em;
+        margin-top: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .form-section button:hover {
+        background: #1256a3;
+      }
+      #mainButtons {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin: 18px 0 0 0;
+      }
+      #mainButtons button {
+        background: #e3f0fd;
+        color: #1976d2;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      #mainButtons button:hover {
+        background: #bbdefb;
+      }
+      .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 18px 0 0 0;
+      }
+      .buttons button {
+        background: #fff;
+        color: #1976d2;
+        border: 1px solid #1976d2;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .buttons button:hover {
+        background: #1976d2;
+        color: #fff;
+      }
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 28px 0 0 0;
+        background: #f7faff;
+        border-radius: 10px;
+        padding: 16px 0;
+        box-shadow: 0 1px 4px rgba(25,118,210,0.07);
+      }
+      .stats div {
+        text-align: center;
+      }
+      .stats strong {
+        display: block;
+        font-size: 1.3em;
+        color: #1976d2;
+      }
+      .stats span {
+        color: #555;
+        font-size: 0.98em;
+      }
+      #userPosts {
+        margin-top: 24px;
+      }
+      #userPosts h3 {
+        text-align: center;
+        color: #1976d2;
+        margin-bottom: 18px;
+      }
+      .post {
+        background: #f7faff;
+        border-radius: 10px;
+        box-shadow: 0 1px 4px rgba(25,118,210,0.07);
+        padding: 16px;
+        margin-bottom: 18px;
+        text-align: left;
+      }
+      .post img {
+        width: 100%;
+        max-width: 300px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .post p {
+        margin: 0;
+        color: #333;
+        font-size: 1.05em;
+      }
+      @media (max-width: 700px) {
+        .profile {
+          margin: 72px 4px 0 4px;
+          padding: 18px 4px 18px 4px;
+        }
+        .stats {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .sidebar {
+          left: -220px;
+        }
+        .sidebar.active {
+          left: 0;
+        }
+        header {
+          left: 0;
+        }
+      }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <h2>📚 Меню</h2>
+    <a href="home.html">🏠 Главная</a>
+    <a href="messenger.html">💬 Мессенджер</a>
+    <a href="feed.html">📰 Лента</a>
+    <a href="friends.html">👥 Друзья</a>
+    <a href="account.html">👤 Профиль</a>
+  </div>
+
+  <header>
+    <span class="menu-toggle" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </span>
+    <span>СМП — Профиль</span>
+    <a href="account.html"><i class="fas fa-user-circle"></i></a>
+  </header>
+
+  <div class="profile">
+    <img id="avatar" src="https://via.placeholder.com/100" alt="Аватар">
+    <h2 id="name">Иван Иванов</h2>
+    <p id="about"></p>
+    <p id="contacts"></p>
+    <div class="form-section" id="formSection">
+      <label for="avatarUpload">Фото профиля</label>
+      <input type="file" id="avatarUpload" accept="image/*">
+
+      <label for="desc">Краткое описание</label>
+      <textarea id="desc" placeholder="О себе..."></textarea>
+
+      <label for="contactsInput">Ваш Telegram / Instagram</label>
+      <input type="text" id="contactsInput" placeholder="@example">
+
+      <button id="saveProfileBtn" onclick="saveProfile()">Сохранить</button>
+      <div id="profileMsg" style="margin-top:8px;font-size:0.98em;"></div>
+    </div>
+    <div id="mainButtons">
+      <button onclick="showForm()">Редактировать</button>
+      <button onclick="showUserPosts()">Мои посты</button>
+    </div>
+    <div class="buttons">
+      <button><i class="fas fa-user-plus"></i> Добавить в друзья</button>
+      <button><i class="fas fa-envelope"></i> Написать</button>
+    </div>
+    <div class="stats" id="stats">
+      <div>
+        <strong id="friendsCount">0</strong>
+        <span>Друзей</span>
+      </div>
+      <div>
+        <strong id="postsCount">0</strong>
+        <span>Постов</span>
+      </div>
+      <div>
+        <strong id="photosCount">0</strong>
+        <span>Фото</span>
+      </div>
+    </div>
+    <div id="userPosts" style="margin-top:24px;"></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://cwqizxpukzetxuzfwtlc.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cWl6eHB1a3pldHh1emZ3dGxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMTEyODUsImV4cCI6MjA2NTU4NzI4NX0.j6E3Upj6dJZantRZ4ScJO4WxH-GfFaPesN83uDvGi-g";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Загрузка профиля пользователя из Supabase
+    async function loadProfile() {
+      const user_id = localStorage.getItem('user_id');
+      if (!user_id) return;
+      const { data, error } = await supabase.from('users').select('*').eq('id', user_id).single();
+      if (data) {
+        document.getElementById('name').textContent = data.name + ' ' + data.surname;
+        document.getElementById('about').textContent = data.about || '';
+        document.getElementById('contacts').textContent = data.contacts || '';
+        document.getElementById('avatar').src = data.avatar_url || 'https://via.placeholder.com/100';
+        document.getElementById('desc').value = data.about || '';
+        document.getElementById('contactsInput').value = data.contacts || '';
+      }
+    }
+
+    // Сохранение профиля в Supabase
+    async function saveProfile() {
+      const user_id = localStorage.getItem('user_id');
+      if (!user_id) return;
+      const desc = document.getElementById('desc').value;
+      const contacts = document.getElementById('contactsInput').value;
+      let avatar_url = document.getElementById('avatar').src;
+      const avatarInput = document.getElementById('avatarUpload');
+      const btn = document.getElementById('saveProfileBtn');
+      const msg = document.getElementById('profileMsg');
+      btn.disabled = true;
+      msg.textContent = '';
+      try {
+        if (avatarInput.files.length > 0) {
+          const reader = new FileReader();
+          reader.onload = async function(e) {
+            avatar_url = e.target.result;
+            const { error } = await supabase.from('users').update({ about: desc, contacts, avatar_url }).eq('id', user_id);
+            if (error) {
+              msg.style.color = 'crimson';
+              msg.textContent = 'Ошибка сохранения профиля';
+              btn.disabled = false;
+              return;
+            }
+            document.getElementById('avatar').src = avatar_url;
+            document.getElementById('about').textContent = desc;
+            document.getElementById('contacts').textContent = contacts;
+            msg.style.color = 'green';
+            msg.textContent = 'Профиль успешно сохранён!';
+            setTimeout(() => {
+              document.getElementById('formSection').style.display = 'none';
+              document.getElementById('mainButtons').style.display = 'block';
+              document.getElementById('stats').style.display = 'flex';
+              msg.textContent = '';
+              btn.disabled = false;
+            }, 1200);
+          };
+          reader.readAsDataURL(avatarInput.files[0]);
+          return;
+        }
+        const { error } = await supabase.from('users').update({ about: desc, contacts, avatar_url }).eq('id', user_id);
+        if (error) {
+          msg.style.color = 'crimson';
+          msg.textContent = 'Ошибка сохранения профиля';
+          btn.disabled = false;
+          return;
+        }
+        document.getElementById('about').textContent = desc;
+        document.getElementById('contacts').textContent = contacts;
+        msg.style.color = 'green';
+        msg.textContent = 'Профиль успешно сохранён!';
+        setTimeout(() => {
+          document.getElementById('formSection').style.display = 'none';
+          document.getElementById('mainButtons').style.display = 'block';
+          document.getElementById('stats').style.display = 'flex';
+          msg.textContent = '';
+          btn.disabled = false;
+        }, 1200);
+      } catch (e) {
+        msg.style.color = 'crimson';
+        msg.textContent = 'Ошибка сохранения профиля';
+        btn.disabled = false;
+      }
+    }
+
+    function showForm() {
+      document.getElementById('formSection').style.display = 'block';
+      document.getElementById('mainButtons').style.display = 'none';
+    }
+
+    // Загрузка статистики и постов пользователя
+    async function showUserPosts() {
+      const user_id = localStorage.getItem('user_id');
+      if (!user_id) return;
+      const { data: posts } = await supabase.from('posts').select('*').eq('user_id', user_id).order('created_at', { ascending: false });
+      const postsDiv = document.getElementById('userPosts');
+      postsDiv.innerHTML = '<h3>Мои посты</h3>';
+      let photos = 0;
+      if (posts && posts.length) {
+        posts.forEach(post => {
+          const div = document.createElement('div');
+          div.className = 'post';
+          if (post.image_url) {
+            const img = document.createElement('img');
+            img.src = post.image_url;
+            img.style.width = '100%';
+            img.style.maxWidth = '300px';
+            img.style.borderRadius = '10px';
+            img.style.marginBottom = '8px';
+            div.appendChild(img);
+            photos++;
+          }
+          if (post.text) {
+            const p = document.createElement('p');
+            p.textContent = post.text;
+            div.appendChild(p);
+          }
+          postsDiv.appendChild(div);
+        });
+      } else {
+        postsDiv.innerHTML += '<p>Нет постов</p>';
+      }
+      document.getElementById('postsCount').textContent = posts ? posts.length : 0;
+      document.getElementById('photosCount').textContent = photos;
+    }
+
+    // Пример: количество друзей (можно доработать)
+    document.getElementById('friendsCount').textContent = '0';
+
+    // При загрузке страницы
+    loadProfile();
+    showUserPosts();
+    document.getElementById('stats').style.display = 'flex';
+  </script>
+</body>
+</html>

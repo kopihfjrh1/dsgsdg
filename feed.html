@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>СМП — Лента</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #f0f4ff;
+      scroll-behavior: smooth;
+    }
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1001;
+    }
+    header h1 {
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1.2;
+      max-width: 70%;
+    }
+    header a {
+      color: white;
+      font-size: 20px;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 240px;
+      height: 100%;
+      background: #3b82f6;
+      color: white;
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+    .sidebar.active {
+      left: 0;
+    }
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      margin: 10px 0;
+      font-size: 16px;
+      text-decoration: none;
+    }
+    .menu-toggle {
+      font-size: 22px;
+      cursor: pointer;
+    }
+    main {
+      padding: 20px;
+      animation: fadeIn 0.6s ease-in;
+    }
+    .fab-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 999;
+    }
+    .fab-button:hover {
+      background: #1d4ed8;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+    }
+    .modal-content textarea {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+    .modal-content input[type="file"] {
+      margin-bottom: 10px;
+    }
+    .modal-content .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .post {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .post img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .post-actions {
+      margin-top: 10px;
+    }
+    .post-actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    .story-ring {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 3px solid #3b82f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px auto;
+      overflow: hidden;
+    }
+    .story-ring img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .story-text {
+      text-align: center;
+      font-size: 14px;
+      color: #1e3a8a;
+      margin-top: 4px;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <h2>📚 Меню</h2>
+    <a href="home.html">🏠 Главная</a>
+    <a href="messenger.html">💬 Мессенджер</a>
+    <a href="feed.html">📰 Лента</a>
+    <a href="friends.html">👥 Друзья</a>
+  </div>
+
+  <header>
+    <span class="menu-toggle" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </span>
+    <h1>СМП — Социальная сеть студентов-медиков</h1>
+    <a href="account.html"><i class="fas fa-user-circle"></i></a>
+  </header>
+
+  <button class="fab-button" onclick="toggleModal()">
+    <i class="fas fa-plus"></i>
+  </button>
+
+  <div class="modal" id="postModal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="toggleModal()">&times;</button>
+      <textarea id="postText" placeholder="Введите текст..."></textarea>
+      <input type="file" id="postImage" accept="image/*">
+      <button onclick="publishPost()">Опубликовать</button>
+    </div>
+  </div>
+
+  <main>
+    <div class="story-ring" style="margin-bottom: 24px;">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="story">
+    </div>
+    <div id="feed"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL = "https://cwqizxpukzetxuzfwtlc.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cWl6eHB1a3pldHh1emZ3dGxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMTEyODUsImV4cCI6MjA2NTU4NzI4NX0.j6E3Upj6dJZantRZ4ScJO4WxH-GfFaPesN83uDvGi-g";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Получение имени и фамилии из localStorage (установлено на home.html)
+    function getNameFromGreeting() {
+      const greeting = localStorage.getItem('greeting_name');
+      if (greeting && greeting.trim().length > 0) return greeting;
+      return null;
+    }
+
+    // Получение текущего пользователя из Supabase по user_id из localStorage
+    async function getCurrentUser() {
+      const user_id = localStorage.getItem('user_id');
+      if (!user_id) return null;
+      const { data, error } = await supabase.from('users').select('*').eq('id', user_id).single();
+      if (error || !data) return null;
+      return data;
+    }
+
+    // Загрузка постов из Supabase
+    async function loadPosts() {
+      const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+      const feed = document.getElementById('feed');
+      feed.innerHTML = '';
+      if (data) {
+        data.forEach(post => {
+          const postDiv = document.createElement('div');
+          postDiv.className = 'post';
+
+          // Аватар и имя автора
+          const authorDiv = document.createElement('div');
+          authorDiv.style.display = 'flex';
+          authorDiv.style.alignItems = 'center';
+          authorDiv.style.marginBottom = '8px';
+          const avatar = document.createElement('img');
+          avatar.src = post.avatar_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+          avatar.style.width = '36px';
+          avatar.style.height = '36px';
+          avatar.style.borderRadius = '50%';
+          avatar.style.marginRight = '10px';
+          authorDiv.appendChild(avatar);
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = post.author_name || 'Аноним';
+          nameSpan.style.fontWeight = 'bold';
+          authorDiv.appendChild(nameSpan);
+          postDiv.appendChild(authorDiv);
+
+          if (post.image_url) {
+            const img = document.createElement('img');
+            img.src = post.image_url;
+            img.onclick = () => window.open(img.src, '_blank');
+            postDiv.appendChild(img);
+          }
+          if (post.text) {
+            const p = document.createElement('p');
+            p.textContent = post.text;
+            postDiv.appendChild(p);
+          }
+
+          // Лайки
+          const likesDiv = document.createElement('div');
+          likesDiv.className = 'post-actions';
+          const likeBtn = document.createElement('button');
+          likeBtn.innerHTML = `<i class="fas fa-heart"></i> Лайк`;
+          let likes = post.likes || 0;
+          let liked = false;
+          // Проверяем, лайкал ли этот пользователь (по id поста)
+          const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '[]');
+          if (likedPosts.includes(post.id)) {
+            liked = true;
+            likeBtn.style.color = '#dc2626';
+          }
+          const likesCount = document.createElement('span');
+          likesCount.textContent = ` ${likes}`;
+          likeBtn.onclick = async function() {
+            if (liked) return;
+            likes++;
+            likesCount.textContent = ` ${likes}`;
+            likeBtn.style.color = '#dc2626';
+            liked = true;
+            likedPosts.push(post.id);
+            localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+            await supabase.from('posts').update({ likes }).eq('id', post.id);
+          };
+          likesDiv.appendChild(likeBtn);
+          likesDiv.appendChild(likesCount);
+
+          // Комментарии
+          const commentBtn = document.createElement('button');
+          commentBtn.innerHTML = `<i class="fas fa-comment"></i> Комментарии`;
+          commentBtn.onclick = function() {
+            showComments(post.id);
+          };
+          likesDiv.appendChild(commentBtn);
+          postDiv.appendChild(likesDiv);
+
+          // Имя автора снизу поста
+          const authorBottom = document.createElement('div');
+          authorBottom.textContent = post.author_name || 'Аноним';
+          authorBottom.style.textAlign = 'right';
+          authorBottom.style.fontSize = '13px';
+          authorBottom.style.color = '#2563eb';
+          authorBottom.style.marginTop = '8px';
+          postDiv.appendChild(authorBottom);
+
+          feed.appendChild(postDiv);
+        });
+      }
+    }
+
+    // Публикация поста в Supabase
+    async function publishPost() {
+      const text = document.getElementById('postText').value.trim();
+      const imageInput = document.getElementById('postImage');
+      let image_url = '';
+      let user = null;
+      try {
+        user = await getCurrentUser();
+      } catch (e) {
+        alert('Ошибка получения пользователя!');
+        return;
+      }
+      if (!user) {
+        alert('Вы не авторизованы!');
+        return;
+      }
+      let author_name = localStorage.getItem('greeting_name');
+      if (!author_name || author_name.trim().length === 0) {
+        author_name = user.name + ' ' + user.surname;
+      }
+      if (!text && (!imageInput.files || imageInput.files.length === 0)) {
+        alert('Введите текст или выберите изображение!');
+        return;
+      }
+      if (imageInput.files && imageInput.files.length > 0) {
+        const file = imageInput.files[0];
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          image_url = e.target.result;
+          const { error } = await supabase.from('posts').insert([{ text, image_url, author_name, avatar_url: user.avatar_url, user_id: user.id, likes: 0 }]);
+          if (error) {
+            alert('Ошибка публикации: ' + error.message);
+            return;
+          }
+          toggleModal();
+          document.getElementById('postText').value = '';
+          imageInput.value = '';
+          loadPosts();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const { error } = await supabase.from('posts').insert([{ text, image_url: '', author_name, avatar_url: user.avatar_url, user_id: user.id, likes: 0 }]);
+        if (error) {
+          alert('Ошибка публикации: ' + error.message);
+          return;
+        }
+        toggleModal();
+        document.getElementById('postText').value = '';
+        imageInput.value = '';
+        loadPosts();
+      }
+    }
+
+    // Комментарии
+    async function showComments(postId) {
+      let modal = document.getElementById('comments-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'comments-modal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = 'rgba(0,0,0,0.4)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = '2000';
+        document.body.appendChild(modal);
+      }
+      modal.innerHTML = `<div style="background:#fff;padding:24px 18px 18px 18px;border-radius:16px;max-width:400px;width:90vw;max-height:80vh;overflow:auto;position:relative;">
+        <button onclick="document.getElementById('comments-modal').style.display='none'" style="position:absolute;top:8px;right:12px;font-size:20px;background:none;border:none;cursor:pointer;">&times;</button>
+        <h3 style="margin-top:0;">Комментарии</h3>
+        <div id="comments-list"></div>
+        <textarea id="new-comment" placeholder="Ваш комментарий..." style="width:100%;margin-top:10px;"></textarea>
+        <button onclick="addComment('${postId}')" style="margin-top:8px;background:#2563eb;color:#fff;padding:7px 16px;border-radius:8px;border:none;">Отправить</button>
+      </div>`;
+      modal.style.display = 'flex';
+      // Загрузка комментариев
+      const { data } = await supabase.from('comments').select('*').eq('post_id', postId).order('created_at', { ascending: true });
+      const list = modal.querySelector('#comments-list');
+      list.innerHTML = '';
+      if (data) {
+        data.forEach(c => {
+          const div = document.createElement('div');
+          div.style.margin = '8px 0';
+          div.innerHTML = `<b>${c.author_name || 'Аноним'}:</b> ${c.text}`;
+          list.appendChild(div);
+        });
+      }
+    }
+    async function addComment(postId) {
+      const textarea = document.getElementById('new-comment');
+      const text = textarea.value.trim();
+      if (!text) return;
+      const user = getCurrentUser();
+      await supabase.from('comments').insert([{ post_id: postId, text, author_name: user.name + ' ' + user.surname }]);
+      textarea.value = '';
+      showComments(postId);
+    }
+
+    function toggleModal() {
+      const modal = document.getElementById('postModal');
+      if (modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      } else {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+      }
+    }
+
+    // Загрузка постов при открытии страницы
+    loadPosts();
+  </script>
+</body>
+</html>

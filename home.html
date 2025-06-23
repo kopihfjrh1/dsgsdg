@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>СМП — Социальная сеть студентов-медиков</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #f0f4ff;
+      scroll-behavior: smooth;
+    }
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1001;
+    }
+    header h1 {
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1.2;
+      max-width: 70%;
+    }
+    header a {
+      color: white;
+      font-size: 20px;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 240px;
+      height: 100%;
+      background: #3b82f6;
+      color: white;
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+    .sidebar.active {
+      left: 0;
+    }
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      margin: 10px 0;
+      font-size: 16px;
+      text-decoration: none;
+    }
+    .menu-toggle {
+      font-size: 22px;
+      cursor: pointer;
+    }
+    main {
+      padding: 20px;
+      text-align: center;
+      animation: fadeIn 0.6s ease-in;
+    }
+    main h2 {
+      color: #1e3a8a;
+      font-size: 24px;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <h2>📚 Меню</h2>
+    <a href="home.html">🏠 Главная</a>
+    <a href="messenger.html">💬 Мессенджер</a>
+    <a href="feed.html">📰 Лента</a>
+    <a href="friends.html">👥 Друзья</a>
+  </div>
+
+  <header>
+    <span class="menu-toggle" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </span>
+    <h1>СМП — Социальная сеть студентов-медиков</h1>
+    <a href="account.html"><i class="fas fa-user-circle"></i></a>
+  </header>
+
+  <main>
+    <div id="greeting" style="font-size:1.2em;color:#1e3a8a;margin-bottom:18px;"></div>
+    <h2>📢 Главная новость!</h2>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
+
+    // Приветствие с именем и фамилией пользователя
+    const SUPABASE_URL = "https://cwqizxpukzetxuzfwtlc.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3cWl6eHB1a3pldHh1emZ3dGxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMTEyODUsImV4cCI6MjA2NTU4NzI4NX0.j6E3Upj6dJZantRZ4ScJO4WxH-GfFaPesN83uDvGi-g";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    (async function greetUser() {
+      const greetingDiv = document.getElementById('greeting');
+      const user_id = localStorage.getItem('user_id');
+      if (!user_id) {
+        greetingDiv.textContent = 'Не выполнен вход. Пожалуйста, авторизуйтесь.';
+        greetingDiv.style.color = 'crimson';
+        return;
+      }
+      const { data, error } = await supabase.from('users').select('name,surname').eq('id', user_id).single();
+      if (error) {
+        greetingDiv.textContent = 'Ошибка загрузки профиля.';
+        greetingDiv.style.color = 'crimson';
+        return;
+      }
+      if (data && data.name) {
+        const greetingText = `Приветствую, ${data.name} ${data.surname || ''}!`;
+        greetingDiv.textContent = greetingText;
+        greetingDiv.style.color = '#1e3a8a';
+        // Сохраняем имя и фамилию в localStorage для feed.html
+        localStorage.setItem('greeting_name', `${data.name} ${data.surname || ''}`);
+      } else {
+        greetingDiv.textContent = 'Профиль не найден или не заполнено имя.';
+        greetingDiv.style.color = 'crimson';
+      }
+    })();
+  </script>
+</body>
+</html>
